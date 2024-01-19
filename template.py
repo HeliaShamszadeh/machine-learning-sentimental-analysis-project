@@ -29,6 +29,7 @@ class NaiveBayesClassifier:
             self.class_counts[label] += len(features)
             self.vocab.union(set(features))
             for token in features:
+                self.class_word_counts[label].setdefault(token, 0)
                 self.class_word_counts[label][token] += 1
 
 
@@ -46,7 +47,7 @@ class NaiveBayesClassifier:
         # return the corresponding value
 
         self.class_word_counts[label].setdefault(word, 0)
-        return (1 + self.class_word_counts[label][word]) / (self.class_counts[label] + sum(self.feature_count.keys()))
+        return (1 + self.class_word_counts[label][word]) / (self.class_counts[label] + sum(self.feature_count.values()))
 
     def classify(self, features : list[str]) -> str:
         # predict the class
