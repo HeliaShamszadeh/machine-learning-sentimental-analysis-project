@@ -54,14 +54,21 @@ class NaiveBayesClassifier:
         # inputs: features(list) --> words of a tweet 
         self.calculate_prior()
         best_class = None 
-        score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[1])), features))
+        score = self.prior_p_to_n + sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[1])), features))
         if score >= 0:
-            score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[2])), features))
+            score = self.prior_p_to_u + sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[2])), features))
             best_class = self.classes[0] if score > 0 else self.classes[2]
         else:
-            score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[1]) / self.calculate_likelihood(token, self.classes[2])), features))
+            score = self.prior_n_to_u + sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[1]) / self.calculate_likelihood(token, self.classes[2])), features))
             best_class = self.classes[1] if score > 0 else self.classes[2]
-                
+
+        # when should learn new things?
+        self.feature_count[best_class] += 1  
+        self.class_counts[best_class] += len(features)
+        for token in features:
+            self.class_word_counts[best_class][token] += 1
+            self.vocab.add(token)
+
         return best_class
     
 
