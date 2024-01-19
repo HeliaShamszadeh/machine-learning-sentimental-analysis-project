@@ -16,7 +16,7 @@ class NaiveBayesClassifier:
         self.vocab = set[str]()
         self.feature_count = dict(map(lambda key: (key, 0), self.classes)) # number of features for each class
         self.prior_p_to_n = 0.0; self.prior_p_to_u = 0.0; self.prior_n_to_u = 0.0
-
+        self.alpha = 1
 
 
     def train(self, data : list[tuple[list, str]]) -> None:
@@ -47,7 +47,7 @@ class NaiveBayesClassifier:
         # return the corresponding value
 
         self.class_word_counts[label].setdefault(word, 0)
-        return (1 + self.class_word_counts[label][word]) / (self.class_counts[label] + sum(self.feature_count.values()))
+        return (self.alpha + self.class_word_counts[label][word]) / (self.class_counts[label] + sum(self.feature_count.values()))
 
     def classify(self, features : list[str]) -> str:
         # predict the class
