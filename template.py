@@ -1,7 +1,6 @@
+import math
 # Naive Bayes 3-class Classifier 
-# Authors: Baktash Ansari - Sina Zamani 
 
-# complete each of the class methods  
 
 class NaiveBayesClassifier:
 
@@ -12,9 +11,13 @@ class NaiveBayesClassifier:
         # class_counts --> number of instances of each class
         # vocab --> all unique words  
         self.classes = classes
-        self.class_word_counts = None
-        self.class_counts = len(classes)
-        self.vocab = None
+        self.class_word_counts = dict(map(lambda key: (key, dict()), self.classes))
+        self.class_counts = dict(map(lambda key: (key, 0), self.classes))
+        self.vocab = set[str]()
+        self.feature_count = dict(map(lambda key: (key, 0), self.classes)) # number of features for each class
+        self.prior_p_to_n = 0.0; self.prior_p_to_u = 0.0; self.prior_n_to_u = 0.0
+
+
 
     def train(self, data : list[tuple[list, str]]) -> None:
         # training process:
@@ -22,29 +25,42 @@ class NaiveBayesClassifier:
         # the first index of the tuple is a list of words and the second index is the label(positive, negative, or neutral)
 
         for features, label in data:
-            pass
-            # Your Code
+            self.feature_count[label] += 1
+            self.class_counts[label] += len(features)
+            self.vocab.union(set(features))
+            for token in features:
+                self.class_word_counts[label][token] += 1
 
-    def calculate_prior(self) -> float:
+
+    def calculate_prior(self) -> None:
         # calculate log prior
         # you can add some attributes to this method
   
-        # Your Code
-        return None 
+        self.prior_p_to_n = math.log(self.feature_count[self.classes[0]] / self.feature_count[self.classes[1]])
+        self.prior_p_to_u = math.log(self.feature_count[self.classes[0]] / self.feature_count[self.classes[2]])
+        self.prior_n_to_u = math.log(self.feature_count[self.classes[1]] / self.feature_count[self.classes[2]])
+
 
     def calculate_likelihood(self, word : str, label : str) -> float:
         # calculate likelihhood: P(word | label)
         # return the corresponding value
 
-        # Your Code
-        return None
+        self.class_word_counts[label].setdefault(word, 0)
+        return (1 + self.class_word_counts[label][word]) / (self.class_counts[label] + sum(self.feature_count.keys()))
 
     def classify(self, features : list[str]) -> str:
         # predict the class
         # inputs: features(list) --> words of a tweet 
+        self.calculate_prior()
         best_class = None 
-
-        # Your Code
+        score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[1])), features))
+        if score >= 0:
+            score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[0]) / self.calculate_likelihood(token, self.classes[2])), features))
+            best_class = self.classes[0] if score > 0 else self.classes[2]
+        else:
+            score = sum(map(lambda token : math.log(self.calculate_likelihood(token, self.classes[1]) / self.calculate_likelihood(token, self.classes[2])), features))
+            best_class = self.classes[1] if score > 0 else self.classes[2]
+                
         return best_class
     
 
