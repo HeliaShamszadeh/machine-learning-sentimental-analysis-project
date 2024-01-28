@@ -29,10 +29,7 @@ def load_data(data_path : str):
 # Extracts the features of each tweet, estimates a label for that and compares it with the actual label
 # returns the correct matches / all compares
 def test_model(eval_data_path : str):
-    data = []
-    with open(eval_data_path, "r", newline="") as csv_file:
-        data = map(lambda _line: _line[2:], list(csv.reader(csv_file))[1:])
-    data = map(lambda _tuple : (preprocess(_tuple[0]), _tuple[2]), data)
+    data = load_data(eval_data_path)
     correct = 0
     incorrect = 0
     for features, label in data:
